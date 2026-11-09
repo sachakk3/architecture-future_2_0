@@ -1,0 +1,15 @@
+# Terraform state и чувствительные файлы
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfplan
+.terraform/
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*.auto.tfvars
+# Секреты
+*.pem
+*service-account-key*.json
