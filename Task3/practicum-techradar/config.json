@@ -1,0 +1,111 @@
+{
+  "basePath": "/techradar",
+  "baseUrl": "",
+  "logoFile": "logo.svg",
+  "jsFile": "",
+  "toggles": {
+    "showSearch": true,
+    "showChart": true,
+    "showTagFilter": true,
+    "showQuadrantList": true,
+    "showEmptyRings": false
+  },
+  "sections": ["radar", "tags", "list"],
+  "colors": {
+    "foreground": "#fcf2e6",
+    "background": "#113521",
+    "highlight": "#d4a373",
+    "content": "#fff",
+    "text": "#575757",
+    "link": "#bc6c25",
+    "border": "rgba(255, 255, 255, 0.1)",
+    "tag": "rgba(255, 255, 255, 0.1)"
+  },
+  "quadrants": [
+    {
+      "id": "languages-and-frameworks",
+      "title": "Языки и фреймворки",
+      "description": "Языки программирования и фреймворки для разработки сервисов и интерфейсов «Будущего 2.0».",
+      "color": "#a3b18a"
+    },
+    {
+      "id": "methods-and-patterns",
+      "title": "Методологии и паттерны",
+      "description": "Архитектурные подходы и практики: Data Mesh, DDD, миграция легаси, безопасность.",
+      "color": "#588157"
+    },
+    {
+      "id": "platforms-and-operations",
+      "title": "Платформы и операции",
+      "description": "Облачная платформа, интеграционный слой, платформы данных, IAM и наблюдаемость.",
+      "color": "#3f633e"
+    },
+    {
+      "id": "tools",
+      "title": "Инструменты",
+      "description": "Инструменты витрины данных, работы с качеством данных и легаси-системы, выводимые из эксплуатации.",
+      "color": "#40713f"
+    }
+  ],
+  "rings": [
+    {
+      "id": "adopt",
+      "title": "Adopt — применяем",
+      "description": "Целевые технологии: используем осознанно и развиваем компетенции.",
+      "color": "#588157",
+      "radius": 0.5,
+      "strokeWidth": 5
+    },
+    {
+      "id": "trial",
+      "title": "Trial — пробуем",
+      "description": "Пилотируем на ограниченном контуре, оцениваем ценность перед массовым внедрением.",
+      "color": "#457b9d",
+      "radius": 0.69,
+      "strokeWidth": 3
+    },
+    {
+      "id": "assess",
+      "title": "Assess — оцениваем",
+      "description": "Отслеживаем и оцениваем применимость; внедрение возможно после пилота.",
+      "color": "#bc6c25",
+      "radius": 0.85,
+      "strokeWidth": 2
+    },
+    {
+      "id": "hold",
+      "title": "Hold — выводим",
+      "description": "Легаси и подходы, от которых отказываемся в течение горизонта трансформации.",
+      "color": "#d62828",
+      "radius": 1.0,
+      "strokeWidth": 1
+    }
+  ],
+  "flags": {
+    "new": {
+      "color": "#588157",
+      "title": "Новое в этом релизе",
+      "titleShort": "N",
+      "description": "Добавлено в текущий релиз радара"
+    },
+    "changed": {
+      "color": "#457b9d",
+      "title": "Изменило кольцо",
+      "titleShort": "C",
+      "description": "Переместилось между кольцами по сравнению с прошлым релизом"
+    },
+    "default": {
+      "color": "#d4a373",
+      "title": "Без изменений",
+      "titleShort": "",
+      "description": "Позиция не изменилась"
+    }
+  },
+  "chart": {
+    "size": 800
+  },
+  "imprint": "",
+  "labels": {
+    "pageAbout": "О радаре"
+  }
+}
