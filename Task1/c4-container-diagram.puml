@@ -1,0 +1,141 @@
+' ============================================================================
+' «Будущее 2.0» — Целевая архитектура через год (уровень C4: Container)
+' Модель: Data Mesh + Self-Service Data Portal в облачной инфраструктуре
+' ============================================================================
+@startuml
+title C4 Container Diagram — «Будущее 2.0», целевое состояние (через год)\nАрхитектура работы с данными: Data Mesh + витрина данных (self-service)
+
+skinparam defaultTextAlignment center
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam ArrowThickness 1.5
+skinparam packageBackgroundColor #FDFDFD
+skinparam nodesep 12
+skinparam ranksep 45
+
+' ============================ ЛЕГЕНДА ============================
+package "Легенда" as Legend {
+  rectangle "Легаси, выводится\nиз эксплуатации\n(временное сохранение)" as LegGray #DDDDDD
+  rectangle "Облачные платформенные\nсервисы данных" as LegOrange #FFE0B2
+  rectangle "Витрина данных\n(self-service portal)" as LegGreen #C8E6C9
+  rectangle "Доменные data-платформы\nи data-продукты" as LegBlue #BBDEFB
+  rectangle "Бизнес-системы доменов\n(источники данных)" as LegViolet #E1BEE7
+  rectangle "→ маркеры [S1..S7] —\nключевые бизнес-сценарии\n(см. problems.md)" as LegScen #FFFFFF
+}
+LegGray -[hidden]right- LegOrange
+LegOrange -[hidden]right- LegGreen
+LegGreen -[hidden]right- LegBlue
+LegBlue -[hidden]right- LegViolet
+LegViolet -[hidden]right- LegScen
+
+' ============================ ПЕРСОНАЛ ============================
+actor "Бизнес-пользователь домена\n(аналитик клиник / банка / фармы)" as DomainUser
+actor "Аналитик / менеджер\nГоловного офиса" as HQUser
+actor "Врач / оператор клиники" as ClinicUser
+
+' ============================ ОБЛАКО: ПЛАТФОРМЕННЫЙ СЛОЙ ============================
+package "Облачная инфраструктура (мультиоблако, геораспределённые регионы) — платформенный слой" {
+
+  package "Платформа данных компании (Data Platform Team) — облачные самообслуживаемые сервисы" as Platform {
+    component "Data Portal —\n«Витрина данных»\n(Web-портал самообслуживания)" as Portal #C8E6C9
+    component "Data Catalog\n(каталог data-продуктов,\nметаданные, lineage)" as Catalog #FFE0B2
+    component "Semantic Layer\n(единые бизнес-метрики\nи KPI для всех доменов)" as Semantic #FFE0B2
+    component "Report Builder\n(конструктор отчётов\n«собери сам»)" as Builder #C8E6C9
+    component "Query Engine\n(интерактивные запросы\nк data-продуктам,\nRBO/ACELT-кэш)" as QueryEngine #FFE0B2
+    component "Streaming Platform\n(Kafka, event backbone)" as Kafka #FFE0B2
+    component "CDC / Ingestion\n(Debezium, batch-коннекторы)" as CDC #FFE0B2
+    component "Data Governance\n(DLP, маскирование,\nаудит доступа)" as Governance #FFE0B2
+  }
+
+  component "IAM / SSO\n(Keycloak + AD, RBAC/ABAC)" as IAM #FFE0B2
+  component "Observability & FinOps\n(мониторинг, SLA, cost per domain)" as Observability #FFE0B2
+}
+
+' ============================ ДОМЕНЫ ============================
+package "Медицинский домен (Клиники + ИИ-компания)" as MedDomain {
+  component "МИС / ЭМК\n(мед. карты, истории болезни,\nрезультаты исследований)" as EMK #E1BEE7
+  component "AI-сервисы\n(Python, диагностика,\nобработка исследований)" as AISvc #E1BEE7
+  component "Medical Data Platform\n(Lakehouse: S3 + Spark/Delta)\nData-продукты:\n• Пациенты (обезлич.)\n• Мед. операции\n• Инвентаризация" as MedDP #BBDEFB
+}
+
+package "Финтех-домен (банк, банковская лицензия)" as FinDomain {
+  component "Финтех-сервисы\n(Golang / Java):\nсчета, кредиты,\nплатежи" as FinSvc #E1BEE7
+  component "Банковское ядро" as BankCore #E1BEE7
+  component "Fintech Data Platform\n(Lakehouse)\nData-продукты:\n• Фин. история\n• Счета\n• Кредитный портфель" as FinDP #BBDEFB
+}
+
+package "Корпоративный домен (Головной офис)" as HQDomain {
+  component "HR / Персонал,\nфинансовая отчётность\n(корп. системы)" as CorpSrc #E1BEE7
+  component "Corporate Data Platform\n(Lakehouse)\nData-продукты:\n• Консолид. KPI\n• Фин. отчётность\n• Персонал" as CorpDP #BBDEFB
+}
+
+package "Новые бизнес-направления\n(фарма, электроника для мед. оборудования)" as NewDomains {
+  component "Системы нового домена" as NewSrc #E1BEE7
+  component "Domain Data Platform\n(нового домена)\nразвёрнута из шаблона\nплатформы за дни,\nа не месяцы" as NewDP #BBDEFB
+}
+
+' ============================ ЛЕГАСИ (временное сохранение) ============================
+package "Легаси-зона (выводится из эксплуатации в течение года)" as Legacy {
+  component "Legacy DWH\nMicrosoft SQL Server 2008\n(заморожен: только чтение,\nмиграция данных в домены)" as DWH #DDDDDD
+  component "BI (Power BI)\nс кастомизациями\n(мигрирует в Data Portal)" as BI #DDDDDD
+  component "ESB (Apache Camel)\n(замена: Kafka + API Gateway,\nвременно поддерживает\nлегаси-интеграции)" as ESB #DDDDDD
+  component "PowerBuilder\n(интерфейс операторов\nклиник)" as PB #DDDDDD
+}
+
+' ============================ ПОТОКИ ДАННЫХ ============================
+' Источники -> интеграция -> data-платформы доменов
+EMK --> CDC : события/данные (обезличенные\nдля аналитики)
+AISvc --> Kafka : события исследований [S4]
+FinSvc --> Kafka : финансовые события [S4]
+BankCore --> CDC : финансовые данные
+CorpSrc --> CDC : корпоративные данные
+NewSrc --> Kafka : события нового домена [S6]
+ESB --> DWH : легаси-потоки (поддержка)
+
+CDC --> MedDP
+CDC --> FinDP
+CDC --> CorpDP
+Kafka --> MedDP : streaming-инжест
+Kafka --> FinDP : streaming-инжест
+Kafka --> CorpDP
+Kafka --> NewDP
+DWH --> CDC : миграция исторических данных\nв доменные платформы
+
+' Data-продукты -> витрина данных
+MedDP --> Portal : data-продукт «Медицина»
+FinDP --> Portal : data-продукт «Финансы»
+CorpDP --> Portal : data-продукт «Корпоративный»
+NewDP --> Portal : data-продукт «Новый домен»
+
+Portal --> Catalog : поиск и описание данных
+Portal --> Semantic : бизнес-метрики
+Builder --> QueryEngine
+QueryEngine --> MedDP : federated query
+QueryEngine --> FinDP
+QueryEngine --> CorpDP
+QueryEngine --> NewDP
+
+' Пользователи
+DomainUser --> Portal : [S1] самостоятельные отчёты\nпо своим срезам
+HQUser --> Portal : [S2] кросс-доменная\nуправленческая отчётность
+Builder --> DomainUser : конструктор отчётов
+Portal --> IAM : аутентификация и\nпроверка уровня доступа [S5]
+Portal --> Governance : контроль доступа,\nмаскирование ПДн
+
+' Клиники
+ClinicUser --> EMK : [S3] операционная работа\n(вне витрины данных: мед. карты,\nистории болезни не анализируются)
+EMK --> AISvc : результаты исследований
+AISvc --> EMK : AI-диагностика
+
+' Кросс-доменные сценарии
+FinDP --> CorpDP : консолидированные KPI (соглашения\nмежду data-продуктами)
+MedDP --> CorpDP
+
+' Легаси
+PB --> DWH : временно, до миграции\nинтерфейса
+BI --> DWH : временно, до миграции в Portal
+
+' Нефункциональные сквозные сервисы
+IAM --> DomainUser : SSO
+Observability --> Platform : SLA и отказоустойчивость [S7]
+@enduml

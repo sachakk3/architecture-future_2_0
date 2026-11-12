@@ -1,0 +1,72 @@
+' ============================================================================
+' «Будущее 2.0» — Диаграмма автоматизации развёртывания (Yandex Cloud + Terraform)
+' Конфигурация, проверенная terraform init/plan/apply (см. apply-result.png).
+' Отрисовать: plantuml -tpng deployment-automation.puml
+' ============================================================================
+@startuml
+title Диаграмма автоматизации развёртывания — «Будущее 2.0»\nYandex Cloud, IaaS через Terraform (конфигурация, проверенная apply)
+
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam nodesep 12
+skinparam ranksep 40
+
+' ============================ ЛЕГЕНДА ============================
+package "Легенда" as Legend {
+  rectangle "Управляется Terraform\n(IaC, воспроизводимо)" as LegTf #C8E6C9
+  rectangle "Разворачивается вручную\n(bootstrap, вне IaC)" as LegManual #FFE0B2
+  rectangle "Источник, не создаётся\n(data source)" as LegData #DDDDDD
+}
+LegTf -[hidden]right- LegManual
+LegManual -[hidden]right- LegData
+
+' ============================ РУЧНОЙ КОНТУР ============================
+package "Bootstrap — разворачивается вручную (до terraform apply)" as Manual {
+  rectangle "OAuth-токен / сервисный аккаунт\n(аутентификация Terraform:\nyc init → YC_TOKEN)" as SA #FFE0B2
+  rectangle "Object Storage бакет\nдля terraform.tfstate\n(remote state backend)" as Bucket #FFE0B2
+  rectangle "DNS-зоны и записи\n(домены сервисов)" as DNS #FFE0B2
+  rectangle "SSH-ключи инженеров\n(~/.ssh, передаются в ВМ\nчерез metadata)" as Keys #FFE0B2
+  rectangle "Квоты и лимиты песочницы\n(запрещено: NAT Gateway,\nSecurity Groups, отдельные диски;\nдиски ~10 GB SSD / 10 GB HDD,\nпамять ~16 GB на зону)" as Quotas #FFE0B2
+}
+
+' ============================ TERRAFORM-КОНТУР ============================
+package "Managed by Terraform (main.tf)" as TfZone {
+
+  package "Публичная подсеть — 10.10.0.0/24, зона A" as PublicSub {
+    rectangle "VM bastion\n2 vCPU / 4 GB / 10 GB HDD\nпубличный IP (NAT-адрес)\nSSH-ключ из metadata" as Bastion #C8E6C9
+  }
+
+  package "Приватная подсеть A — 10.10.2.0/24, зона A" as PrivA {
+    rectangle "VM app-1\n2 vCPU / 4 GB / 8 GB SSD\nпубличный IP (ограничение\nпесочницы; в проде — private)" as App1 #C8E6C9
+    rectangle "VM app-2\n2 vCPU / 4 GB / 8 GB HDD\nпубличный IP (ограничение\nпесочницы; в проде — private)" as App2 #C8E6C9
+  }
+
+  package "Приватная подсеть B — 10.10.1.0/24" as PrivB {
+    rectangle "подсеть создана, свободна\n(в песочнице недоступна зона B;\nв проде — app-2 в этой зоне)" as SubB #C8E6C9
+  }
+
+  rectangle "VPC Network future20-network" as Net #C8E6C9
+  rectangle "labels (project/environment/managed-by)\nна всех ресурсах — учёт и группировка" as Labels #C8E6C9
+}
+
+' ============================ ИСТОЧНИКИ ============================
+rectangle "Yandex Cloud Marketplace:\nобраз ubuntu-2204-lts\n(data source yandex_compute_image)" as Image #DDDDDD
+
+' ============================ ПОТОКИ ============================
+SA --> TfZone : провайдер yandex\n(YC_TOKEN / credentials.auto.tfvars)
+Bucket --> TfZone : state (план → apply)
+Image --> Bastion : boot disk
+Image --> App1 : boot disk
+Image --> App2 : boot disk
+
+Net --> PublicSub
+Net --> PrivA
+Net --> PrivB
+Keys --> Bastion : SSH (точка входа\nадминистрирования)
+Keys --> App1
+Keys --> App2
+
+' ============================ ПРОДАКШН-ЭВОЛЮЦИЯ ============================
+rectangle "Продакшн-эволюция (вне песочницы):\nNAT Gateway + Route Table для приватных подсетей,\nSecurity Groups (SSH только от bastion),\nотдельные network-ssd диски данных 50 GB,\napp-ВМ по обеим зонам, Load Balancer" as Prod #E1BEE7
+Prod --> TfZone : следующие итерации IaC
+@enduml
