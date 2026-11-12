@@ -20,7 +20,7 @@ package "Легенда" as Legend {
   rectangle "Витрина данных\n(self-service portal)" as LegGreen #C8E6C9
   rectangle "Доменные data-платформы\nи data-продукты" as LegBlue #BBDEFB
   rectangle "Бизнес-системы доменов\n(источники данных)" as LegViolet #E1BEE7
-  rectangle "→ маркеры [S1..S6] —\nключевые бизнес-сценарии\n(см. problems.md)" as LegScen #FFFFFF
+  rectangle "→ маркеры [S1..S7] —\nключевые бизнес-сценарии\n(см. problems.md)" as LegScen #FFFFFF
 }
 LegGray -[hidden]right- LegOrange
 LegOrange -[hidden]right- LegGreen
@@ -85,11 +85,11 @@ package "Легаси-зона (выводится из эксплуатации
 ' ============================ ПОТОКИ ДАННЫХ ============================
 ' Источники -> интеграция -> data-платформы доменов
 EMK --> CDC : события/данные (обезличенные\nдля аналитики)
-AISvc --> Kafka : события исследований
-FinSvc --> Kafka : финансовые события
+AISvc --> Kafka : события исследований [S4]
+FinSvc --> Kafka : финансовые события [S4]
 BankCore --> CDC : финансовые данные
 CorpSrc --> CDC : корпоративные данные
-NewSrc --> Kafka : события нового домена
+NewSrc --> Kafka : события нового домена [S6]
 ESB --> DWH : легаси-потоки (поддержка)
 
 CDC --> MedDP
@@ -137,5 +137,5 @@ BI --> DWH : временно, до миграции в Portal
 
 ' Нефункциональные сквозные сервисы
 IAM --> DomainUser : SSO
-Observability --> Platform : SLA и отказоустойчивость [S6]
+Observability --> Platform : SLA и отказоустойчивость [S7]
 @enduml
